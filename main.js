@@ -390,12 +390,12 @@ const TAROT_LIBRARY = [
   { id: "sun", name: "太阳", rarity: "普通", cost: 3, text: "将最多 3 张牌变为红桃（♥）" },
   { id: "moon", name: "月亮", rarity: "普通", cost: 3, text: "将最多 3 张牌变为梅花（♣）" },
   { id: "star", name: "星星", rarity: "普通", cost: 3, text: "将最多 3 张牌变为方块（♦）" },
-  { id: "judgement", name: "审判", rarity: "罕见", cost: 5, text: "生成 1 张随机的小丑牌（需空槽位）" },
+  { id: "judgement", name: "审判", rarity: "罕见", cost: 5, text: "生成 1 张随机的核心牌（需空槽位）" },
   { id: "high_priestess", name: "女祭司", rarity: "稀有", cost: 5, text: "生成最多 2 张随机的星球牌（需空槽位）" },
   { id: "emperor", name: "皇帝", rarity: "稀有", cost: 5, text: "生成最多 2 张随机的塔罗牌" },
-  { id: "temperance", name: "节制", rarity: "稀有", cost: 5, text: "获得相当于你所有小丑牌售卖价格总和的金钱" },
+  { id: "temperance", name: "节制", rarity: "稀有", cost: 5, text: "获得相当于你所有核心牌售卖价格总和的金钱" },
   { id: "hermit", name: "隐士", rarity: "普通", cost: 4, text: "使你的当前金钱翻倍，但最多到 20$" },
-  { id: "wheel_of_fortune", name: "命运之轮", rarity: "稀有", cost: 6, text: "25% 概率为一张随机小丑牌添加增强效果" },
+  { id: "wheel_of_fortune", name: "命运之轮", rarity: "稀有", cost: 6, text: "25% 概率为一张随机核心牌添加增强效果" },
   { id: "fool", name: "愚者", rarity: "普通", cost: 6, text: "复制上一张使用的塔罗牌或星球牌（不能复制愚者本身）" },
 ];
 
@@ -405,18 +405,18 @@ const SPECTRAL_LIBRARY = [
   { id: "deja_vu", name: "既视感", rarity: "罕见", cost: 5, text: "为 1 张手牌添加 红色封蜡（打出时分数计算效果触发两次）" },
   { id: "trance", name: "入迷", rarity: "罕见", cost: 5, text: "为 1 张手牌添加 蓝色封蜡（留在手牌直到回合结束，获得一张随机星球牌）" },
   { id: "medium", name: "灵媒", rarity: "罕见", cost: 5, text: "为 1 张手牌添加 紫色封蜡（弃牌时获得一张随机塔罗牌）" },
-  { id: "ectoplasm", name: "灵质", rarity: "稀有", cost: 6, text: "为一张随机小丑牌添加负片效果（+1 小丑牌槽位），代价是 -1 手牌上限" },
+  { id: "ectoplasm", name: "灵质", rarity: "稀有", cost: 6, text: "为一张随机核心牌添加负片效果（+1 核心牌槽位），代价是 -1 手牌上限" },
   { id: "familiar", name: "熟知", rarity: "罕见", cost: 4, text: "随机摧毁 1 张手牌，并添加 3 张随机增强版人头牌（J、Q、K）" },
   { id: "grim", name: "严峻", rarity: "罕见", cost: 4, text: "随机摧毁 1 张手牌，并添加 2 张随机增强版 A" },
   { id: "incantation", name: "咒语", rarity: "罕见", cost: 4, text: "随机摧毁 1 张手牌，并添加 4 张随机增强版数字牌" },
   { id: "sigil", name: "符印", rarity: "罕见", cost: 5, text: "将手牌中所有卡牌的花色转换为一种随机花色" },
   { id: "ouija", name: "占卜", rarity: "稀有", cost: 6, text: "将手中所有手持牌转换为一种随机点数，但会 -1 手牌上限" },
   { id: "immolate", name: "火祭", rarity: "稀有", cost: 6, text: "随机摧毁 5 张手牌，获得 20$" },
-  { id: "wraith", name: "幽灵", rarity: "传奇", cost: 7, text: "产生一张随机的稀有小丑牌，但会将你的金钱清零" },
-  { id: "ankh", name: "生命十字章", rarity: "传奇", cost: 7, text: "随机复制一张小丑牌，然后摧毁所有其他小丑牌" },
-  { id: "hex", name: "妖法", rarity: "稀有", cost: 7, text: "为一张随机小丑牌添加多彩（x1.5 倍率）特效，然后摧毁其他所有小丑牌" },
+  { id: "wraith", name: "幽灵", rarity: "传奇", cost: 7, text: "产生一张随机的稀有核心牌，但会将你的金钱清零" },
+  { id: "ankh", name: "生命十字章", rarity: "传奇", cost: 7, text: "随机复制一张核心牌，然后摧毁所有其他核心牌" },
+  { id: "hex", name: "妖法", rarity: "稀有", cost: 7, text: "为一张随机核心牌添加多彩（x1.5 倍率）特效，然后摧毁其他所有核心牌" },
   { id: "cryptid", name: "神秘生物", rarity: "稀有", cost: 6, text: "选择一张卡牌，将其复制 2 张" },
-  { id: "soul", name: "灵魂", rarity: "传奇", cost: 8, text: "生成一张随机的传奇小丑牌" },
+  { id: "soul", name: "灵魂", rarity: "传奇", cost: 8, text: "生成一张随机的传奇核心牌" },
   { id: "black_hole", name: "黑洞", rarity: "传奇", cost: 8, text: "为所有扑克牌型提升 1 个等级" },
 ];
 
@@ -993,7 +993,7 @@ const TAROT_EFFECTS = {
     const joker = pickRandom(JOKER_LIBRARY);
     if (!joker) return false;
     if (state.jokers.length >= getJokerLimit()) {
-      addLog("小丑牌槽位已满，无法生成小丑牌。");
+      addLog("核心牌槽位已满，无法生成核心牌。");
       return false;
     }
     addJokerToState(joker);
@@ -1146,12 +1146,12 @@ const SPECTRAL_EFFECTS = {
     const joker = pickRandom(pool);
     if (!joker) return false;
     if (state.jokers.length >= getJokerLimit()) {
-      addLog("小丑牌槽位已满，无法生成稀有小丑牌。");
+      addLog("核心牌槽位已满，无法生成稀有核心牌。");
       return false;
     }
     state.money = 0;
     addJokerToState(joker);
-    addLog(`${item.name}：生成了一张稀有小丑牌，金币清零。`);
+    addLog(`${item.name}：生成了一张稀有核心牌，金币清零。`);
     return true;
   },
   ankh(item) {
@@ -1159,7 +1159,7 @@ const SPECTRAL_EFFECTS = {
     if (!joker) return false;
     const clone = cloneJoker(joker);
     state.jokers = [joker, clone];
-    addLog(`${item.name}：复制了一张小丑牌，其余小丑牌已摧毁。`);
+    addLog(`${item.name}：复制了一张核心牌，其余核心牌已摧毁。`);
     return true;
   },
   hex(item) {
@@ -1167,7 +1167,7 @@ const SPECTRAL_EFFECTS = {
     if (!joker) return false;
     setJokerEdition(joker, "polychrome");
     state.jokers = [joker];
-    addLog(`${item.name}：为随机小丑牌添加多彩效果，其余小丑牌已摧毁。`);
+    addLog(`${item.name}：为随机核心牌添加多彩效果，其余核心牌已摧毁。`);
     return true;
   },
   cryptid(item) {
@@ -1182,11 +1182,11 @@ const SPECTRAL_EFFECTS = {
     const joker = pickRandom(pool);
     if (!joker) return false;
     if (state.jokers.length >= getJokerLimit()) {
-      addLog("小丑牌槽位已满，无法生成传奇小丑牌。");
+      addLog("核心牌槽位已满，无法生成传奇核心牌。");
       return false;
     }
     addJokerToState(joker);
-    addLog(`${item.name}：生成了一张传奇小丑牌。`);
+    addLog(`${item.name}：生成了一张传奇核心牌。`);
     return true;
   },
   black_hole(item) {
@@ -1750,7 +1750,7 @@ function buyJoker(ownedId) {
     return;
   }
   if (state.jokers.length >= getJokerLimit()) {
-    addLog("小丑牌槽位已满，先出售再购买。");
+    addLog("核心牌槽位已满，先出售再购买。");
     render();
     return;
   }
@@ -1889,7 +1889,7 @@ function renderJokers() {
   if (state.jokers.length === 0) {
     const empty = document.createElement("div");
     empty.className = "log-entry";
-    empty.textContent = "还没有小丑牌";
+    empty.textContent = "还没有核心牌";
     els.jokerArea.appendChild(empty);
     return;
   }
@@ -2094,7 +2094,7 @@ function render() {
       els.resultTitle.textContent = "\u672c\u5c40\u5931\u8d25";
       els.resultText.textContent = "\u5f53\u524d\u76f2\u6ce8\u6ca1\u6709\u8fbe\u6210\u76ee\u6807\u5206\uff0c\u8fd9\u4e00\u5c40\u5230\u6b64\u7ed3\u675f\u3002";
     }
-    els.resultStats.textContent = `\u505c\u5728\u7b2c ${blind.ante} \u9636\u6bb5\u7684 ${blind.type}\uff0c\u91d1\u5e01 ${state.money}\uff0c\u5c0f\u4e11\u724c ${state.jokers.length} \u5f20\u3002`;
+  els.resultStats.textContent = `\u505c\u5728\u7b2c ${blind.ante} \u9636\u6bb5\u7684 ${blind.type}\uff0c\u91d1\u5e01 ${state.money}\uff0c\u6838\u5fc3\u724c ${state.jokers.length} \u5f20\u3002`;
   }
   syncModalScrollLock();
   serializeState();
