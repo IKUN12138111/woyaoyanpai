@@ -640,6 +640,12 @@ const els = {
 
 const state = {};
 
+function syncModalScrollLock() {
+  const modalOpen = !els.shopModal.hidden || !els.resultModal.hidden || !els.helpModal.hidden;
+  document.documentElement.classList.toggle("modal-open", modalOpen);
+  document.body.classList.toggle("modal-open", modalOpen);
+}
+
 function getJokerRarity(id) {
   const rarityMap = {
     basic_joker: "普通",
@@ -1647,16 +1653,19 @@ function showOutcome(type) {
 
 function dismissOutcome() {
   els.resultModal.hidden = true;
+  syncModalScrollLock();
 }
 
 function openHelp() {
   els.shopModal.hidden = true;
   els.resultModal.hidden = true;
   els.helpModal.hidden = false;
+  syncModalScrollLock();
 }
 
 function closeHelp() {
   els.helpModal.hidden = true;
+  syncModalScrollLock();
 }
 
 function processEndOfRoundSealRewards() {
@@ -2087,6 +2096,7 @@ function render() {
     }
     els.resultStats.textContent = `\u505c\u5728\u7b2c ${blind.ante} \u9636\u6bb5\u7684 ${blind.type}\uff0c\u91d1\u5e01 ${state.money}\uff0c\u5c0f\u4e11\u724c ${state.jokers.length} \u5f20\u3002`;
   }
+  syncModalScrollLock();
   serializeState();
 }
 

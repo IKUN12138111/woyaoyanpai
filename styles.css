@@ -21,6 +21,12 @@ body {
   min-height: 100%;
 }
 
+html.modal-open,
+body.modal-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
   color: var(--ivory);
@@ -1451,10 +1457,11 @@ h2 {
 }
 
 #shopModal .modal-card {
-  max-height: calc(100vh - 40px);
+  height: min(calc(100vh - 40px), 920px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
 }
 
 #shopModal .modal-copy {
@@ -1467,10 +1474,12 @@ h2 {
   overflow-y: auto;
   padding-right: 4px;
   align-content: start;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 #shopModal .shop-area .joker-card {
-  min-height: 260px;
+  min-height: 240px;
 }
 
 .modal-head {
