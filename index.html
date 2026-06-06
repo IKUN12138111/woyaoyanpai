@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>我不是赌神</title>
-  <link rel="stylesheet" href="./styles.css?v=12">
+  <link rel="stylesheet" href="./styles.css?v=14">
 </head>
 <body>
   <div class="table-noise"></div>
@@ -80,7 +80,7 @@
       <aside class="side-panel">
         <article class="info-card">
           <h3 class="section-title">消耗牌库存</h3>
-          <p class="info-text">先选中手牌，再点击“使用”。塔罗牌和幻灵牌会保留在这里，直到被消耗。</p>
+          <p class="info-text">先选中手牌，再点击“使用”。塔罗牌和幻灵牌会保留在这里，直到被消耗；行星牌会在获得时自动强化对应牌型。</p>
           <div id="consumableArea" class="consumable-area"></div>
         </article>
 
@@ -112,7 +112,7 @@
         </div>
         <button id="closeShopBtn" class="btn btn-ghost">进入下一盲注</button>
       </div>
-      <p class="modal-copy">通过盲注后可购买核心牌强化构筑；行星牌、塔罗牌和幻灵牌会进入库存，使用后才会生效。</p>
+      <p class="modal-copy">通过盲注后可购买核心牌强化构筑；行星牌会在获得时自动强化对应牌型，塔罗牌和幻灵牌才会进入库存并在使用后生效。</p>
       <div id="shopArea" class="shop-area"></div>
       <div class="shop-actions">
         <button id="refreshShopBtn" class="btn btn-soft">刷新商店（1 金币）</button>
@@ -310,6 +310,6 @@
     </article>
   </template>
 
-  <script src="./main.js?v=12"></script>
+  <script src="./main.js?v=14"></script>
 </body>
 </html>

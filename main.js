@@ -332,7 +332,7 @@ function createRandomCard({ rankPool, suitPool, enhancementPool } = {}) {
 }
 
 function createRandomFaceCard() {
-  return createRandomCard({ rankPool: RANKS.filter((rank) => rank.face) });
+  return createRandomCard({ rankPool: RANKS.filter((rank) => ["J", "Q", "K"].includes(rank.key)) });
 }
 
 function createRandomAceCard() {
@@ -418,7 +418,7 @@ const TAROT_LIBRARY = [
   { id: "moon", name: "月亮", rarity: "普通", cost: 3, text: "将最多 3 张牌变为梅花（♣）" },
   { id: "star", name: "星星", rarity: "普通", cost: 3, text: "将最多 3 张牌变为方块（♦）" },
   { id: "judgement", name: "审判", rarity: "罕见", cost: 5, text: "生成 1 张随机的核心牌（需空槽位）" },
-  { id: "high_priestess", name: "女祭司", rarity: "稀有", cost: 5, text: "生成最多 2 张随机的星球牌（需空槽位）" },
+  { id: "high_priestess", name: "女祭司", rarity: "稀有", cost: 5, text: "自动强化最多 2 次星球效果（对应牌型立即生效）" },
   { id: "emperor", name: "皇帝", rarity: "稀有", cost: 5, text: "生成最多 2 张随机的塔罗牌" },
   { id: "temperance", name: "节制", rarity: "稀有", cost: 5, text: "获得相当于你所有核心牌售卖价格总和的金钱" },
   { id: "hermit", name: "隐士", rarity: "普通", cost: 4, text: "使你的当前金钱翻倍，但最多到 20$" },
@@ -430,7 +430,7 @@ const SPECTRAL_LIBRARY = [
   { id: "aura", name: "光环", rarity: "罕见", cost: 4, text: "为 1 张选定的卡牌添加随机效果（闪箔 +50 筹码 / 镭射 +10 倍率 / 多彩 x1.5 倍率）" },
   { id: "talisman", name: "护身符", rarity: "罕见", cost: 4, text: "为 1 张卡牌添加 金色封蜡（打出并得分时获得 3$）" },
   { id: "deja_vu", name: "既视感", rarity: "罕见", cost: 5, text: "为 1 张手牌添加 红色封蜡（打出时分数计算效果触发两次）" },
-  { id: "trance", name: "入迷", rarity: "罕见", cost: 5, text: "为 1 张手牌添加 蓝色封蜡（留在手牌直到回合结束，获得一张随机星球牌）" },
+  { id: "trance", name: "入迷", rarity: "罕见", cost: 5, text: "为 1 张手牌添加 蓝色封蜡（留在手牌直到回合结束，获得一张随机星球牌并自动生效）" },
   { id: "medium", name: "灵媒", rarity: "罕见", cost: 5, text: "为 1 张手牌添加 紫色封蜡（弃牌时获得一张随机塔罗牌）" },
   { id: "ectoplasm", name: "灵质", rarity: "稀有", cost: 6, text: "为一张随机核心牌添加负片效果（+1 核心牌槽位），代价是 -1 手牌上限" },
   { id: "familiar", name: "熟知", rarity: "罕见", cost: 4, text: "随机摧毁 1 张手牌，并添加 3 张随机增强版人头牌（J、Q、K）" },
@@ -564,11 +564,11 @@ const JOKER_LIBRARY = [
     tag: "技巧",
     cost: 5,
     sell: 2,
-    text: "如果本次出牌张数不超过 3，+10 倍率。",
+    text: "如果本次出牌张数不超过 3，+15 倍率。",
     apply(result) {
       if (result.selectedCount <= 3) {
-        result.mult += 10;
-        result.breakdown.push("半身小丑：小手牌 +10 倍率");
+        result.mult += 15;
+        result.breakdown.push("半身小丑：小手牌 +15 倍率");
       }
     },
   },
@@ -927,10 +927,13 @@ function getJokerScoreBonus(joker) {
 
 function addRandomPlanetToInventory(count = 1) {
   const planets = shuffle(PLANET_LIBRARY).slice(0, count);
+  let applied = 0;
   for (const planet of planets) {
-    addConsumableToInventory({ ...planet, kind: "planet" });
+    if (applyPlanetEffect(planet, { logEffect: false })) {
+      applied += 1;
+    }
   }
-  return planets.length;
+  return applied;
 }
 
 function addRandomTarotToInventory(count = 1) {
@@ -949,7 +952,7 @@ function addRandomSpectralToInventory(count = 1) {
   return spectrals.length;
 }
 
-function applyPlanetEffect(planet, { recordLastUse = true } = {}) {
+function applyPlanetEffect(planet, { recordLastUse = true, logEffect = true } = {}) {
   const levelState = state.handLevels[planet.targetHand];
   if (!levelState) return false;
   levelState.level += 1;
@@ -958,7 +961,9 @@ function applyPlanetEffect(planet, { recordLastUse = true } = {}) {
   if (recordLastUse) {
     state.lastConsumableUse = { kind: "planet", id: planet.id };
   }
-  addLog(`${planet.name} 生效，${planet.targetHand} 升到 ${levelState.level} 级。`);
+  if (logEffect) {
+    addLog(`${planet.name} 生效，${planet.targetHand} 升到 ${levelState.level} 级。`);
+  }
   return true;
 }
 
@@ -1172,7 +1177,7 @@ const TAROT_EFFECTS = {
   high_priestess(item) {
     const generated = addRandomPlanetToInventory(2);
     if (generated === 0) return false;
-    addLog(`${item.name}：生成了 ${generated} 张星球牌。`);
+    addLog(`${item.name}：自动强化了 ${generated} 次星球效果。`);
     return true;
   },
   emperor(item) {
@@ -1274,7 +1279,7 @@ const SPECTRAL_EFFECTS = {
   familiar(item) {
     const removed = removeRandomHandCards(1);
     if (removed.length === 0) return false;
-    addRandomEnhancedCards({ count: 3, rankPool: RANKS.filter((rank) => rank.face) });
+    addRandomEnhancedCards({ count: 3, rankPool: RANKS.filter((rank) => ["J", "Q", "K"].includes(rank.key)) });
     addLog(`${item.name}：摧毁 1 张手牌并补充 3 张人头牌。`);
     return true;
   },
@@ -1858,8 +1863,10 @@ function closeHelp() {
 function processEndOfRoundSealRewards() {
   const blueSealCount = state.handCards.filter((card) => card.seal === "blue").length;
   if (blueSealCount > 0) {
-    addRandomPlanetToInventory(blueSealCount);
-    addLog(`蓝色封蜡触发，获得 ${blueSealCount} 张星球牌。`);
+    const applied = addRandomPlanetToInventory(blueSealCount);
+    if (applied > 0) {
+      addLog(`蓝色封蜡触发，自动强化了 ${applied} 次星球效果。`);
+    }
   }
 }
 
@@ -1957,10 +1964,15 @@ function buyPlanet(ownedId) {
     render();
     return;
   }
+  const applied = applyPlanetEffect(item, { logEffect: false });
+  if (!applied) {
+    addLog(`${item.name} 暂时没有可强化的牌型。`);
+    render();
+    return;
+  }
   state.money -= item.cost;
-  addConsumableToInventory({ ...item, kind: "planet" });
   state.shopItems = state.shopItems.filter((entry) => entry.ownedId !== ownedId);
-  addLog(`${item.name} 已收入行星牌库存。`);
+  addLog(`${item.name} 已购买并自动强化了 ${item.targetHand}。`);
   render();
 }
 

@@ -312,10 +312,11 @@ function runSelfTest(api) {
   for (const planet of api.PLANET_LIBRARY) {
     runCase(`行星 ${planet.name}`, () => {
       reset(api);
-      const owned = addConsumable(api, "planet", planet.id);
-      api.useConsumable("planet", owned.ownedId);
+      const beforeLevel = api.state.handLevels[planet.targetHand].level;
+      const applied = api.applyPlanetEffect(planet);
+      assert.equal(applied, true);
       const levelState = api.state.handLevels[planet.targetHand];
-      assert.equal(levelState.level, 2);
+      assert.equal(levelState.level, beforeLevel + 1);
       assert.equal(levelState.chipsBonus, 10);
       assert.equal(levelState.multBonus, 1);
       assert.equal(api.state.lastConsumableUse.kind, "planet");
@@ -323,6 +324,17 @@ function runSelfTest(api) {
       assert.equal(api.state[getInventoryField("planet")].length, 0);
     }, failures);
   }
+
+  runCase("星球奖励自动生效", () => {
+    reset(api);
+    withRandom([0], () => {
+      const applied = api.addRandomPlanetToInventory(2);
+      assert.equal(applied, 2);
+    });
+    const upgradedHands = Object.values(api.HAND_TYPES).filter((handType) => api.state.handLevels[handType].level > 1);
+    assert.equal(upgradedHands.length, 2);
+    assert.equal(api.state[getInventoryField("planet")].length, 0);
+  }, failures);
 
   const tarotSuccessCases = [
     {
@@ -453,8 +465,11 @@ function runSelfTest(api) {
     {
       id: "high_priestess",
       setup: () => ({}),
+      random: [0],
       verify: () => {
-        assert.equal(api.state.planetInventory.length, 2);
+        const upgradedHands = Object.values(api.HAND_TYPES).filter((handType) => api.state.handLevels[handType].level > 1);
+        assert.equal(upgradedHands.length, 2);
+        assert.equal(api.state.planetInventory.length, 0);
       },
     },
     {
@@ -509,12 +524,20 @@ function runSelfTest(api) {
       const owned = addConsumable(api, "tarot", testCase.id);
       if (testCase.id === "wheel_of_fortune") {
         withRandom([0.1, 0.2, 0.4], () => api.useConsumable("tarot", owned.ownedId));
+      } else if (testCase.random) {
+        withRandom(testCase.random, () => api.useConsumable("tarot", owned.ownedId));
       } else {
         api.useConsumable("tarot", owned.ownedId);
       }
       testCase.verify();
       assert.equal(api.state.tarotInventory.some((item) => item.ownedId === owned.ownedId), false);
-      assert.equal(api.state.lastConsumableUse.id, testCase.id);
+      const expectedLastUse = testCase.expectedLastUse || { kind: "tarot", id: testCase.id };
+      if (expectedLastUse.kind) {
+        assert.equal(api.state.lastConsumableUse.kind, expectedLastUse.kind);
+      }
+      if (expectedLastUse.id) {
+        assert.equal(api.state.lastConsumableUse.id, expectedLastUse.id);
+      }
     }, failures);
   }
 
@@ -694,6 +717,22 @@ function runSelfTest(api) {
       assert.equal(api.state.lastConsumableUse.id, testCase.id);
     }, failures);
   }
+
+  runCase("半身小丑 3 张牌触发 15 倍率", () => {
+    reset(api, {
+      handCards: makeHand(api, [
+        { rank: "2", suit: "spades" },
+        { rank: "3", suit: "hearts" },
+        { rank: "4", suit: "clubs" },
+      ]),
+      jokers: [makeJoker(api, "small_hand_joker")],
+      drawPile: [],
+      discardPile: [],
+    });
+    api.state.selectedIds = new Set(api.state.handCards.map((card) => card.id));
+    api.playSelected();
+    assert.equal(api.state.scoreCurrent, 144);
+  }, failures);
 
   for (const id of targetTarotIds) {
     runCase(`塔罗 ${id} 空手失败`, () => {
