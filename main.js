@@ -422,7 +422,7 @@ const TAROT_LIBRARY = [
   { id: "emperor", name: "皇帝", rarity: "稀有", cost: 5, text: "生成最多 2 张随机的塔罗牌" },
   { id: "temperance", name: "节制", rarity: "稀有", cost: 5, text: "获得相当于你所有核心牌售卖价格总和的金钱" },
   { id: "hermit", name: "隐士", rarity: "普通", cost: 4, text: "使你的当前金钱翻倍，但最多到 20$" },
-  { id: "wheel_of_fortune", name: "命运之轮", rarity: "稀有", cost: 6, text: "25% 概率为一张随机核心牌添加增强效果" },
+  { id: "wheel_of_fortune", name: "命运之轮", rarity: "稀有", cost: 6, text: "50% 概率为一张随机核心牌添加增强效果，未触发也会消耗" },
   { id: "fool", name: "愚者", rarity: "普通", cost: 6, text: "复制上一张使用的塔罗牌或星球牌（不能复制愚者本身）" },
 ];
 
@@ -1196,12 +1196,16 @@ const TAROT_EFFECTS = {
     return true;
   },
   wheel_of_fortune(item) {
-    if (Math.random() >= 0.25) return false;
     const joker = getRandomJoker();
     if (!joker) return false;
-    const edition = pickRandom(["foil", "holo", "polychrome"]);
-    setJokerEdition(joker, edition);
-    addLog(`${item.name}：${joker.name} 获得了 ${getJokerEditionLabel(edition)}。`);
+    const triggered = Math.random() < 0.5;
+    if (triggered) {
+      const edition = pickRandom(["foil", "holo", "polychrome"]);
+      setJokerEdition(joker, edition);
+      addLog(`${item.name}：${joker.name} 获得了 ${getJokerEditionLabel(edition)}。`);
+    } else {
+      addLog(`${item.name}：本次未触发增强效果，但已消耗。`);
+    }
     return true;
   },
   fool(item) {

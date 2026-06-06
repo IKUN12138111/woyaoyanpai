@@ -256,10 +256,10 @@ function addConsumable(api, kind, id) {
   return api.addConsumableToInventory({ ...definition, kind });
 }
 
-function addJoker(api, id) {
+function makeJoker(api, id) {
   const definition = api.JOKER_LIBRARY.find((item) => item.id === id);
   assert.ok(definition, `joker:${id} missing from library`);
-  return api.addJokerToState(definition);
+  return { ...definition };
 }
 
 function reset(api, overrides = {}) {
@@ -480,7 +480,7 @@ function runSelfTest(api) {
     },
     {
       id: "wheel_of_fortune",
-      setup: () => ({ jokers: [api.JOKER_LIBRARY.find((item) => item.id === "basic_joker")] }),
+      setup: () => ({ jokers: [makeJoker(api, "basic_joker")] }),
       verify: () => {
         assert.ok(["foil", "holo", "polychrome"].includes(api.state.jokers[0].edition));
       },
@@ -517,6 +517,14 @@ function runSelfTest(api) {
       assert.equal(api.state.lastConsumableUse.id, testCase.id);
     }, failures);
   }
+
+  runCase("塔罗 wheel_of_fortune 未触发仍消耗", () => {
+    reset(api, { jokers: [makeJoker(api, "basic_joker")] });
+    const owned = addConsumable(api, "tarot", "wheel_of_fortune");
+    withRandom([0.9], () => api.useConsumable("tarot", owned.ownedId));
+    assert.equal(api.state.tarotInventory.some((item) => item.ownedId === owned.ownedId), false);
+    assert.equal(api.state.jokers[0].edition, undefined);
+  }, failures);
 
   const spectralSuccessCases = [
     {
@@ -556,7 +564,7 @@ function runSelfTest(api) {
     },
     {
       id: "ectoplasm",
-      setup: () => ({ jokers: [api.JOKER_LIBRARY.find((item) => item.id === "basic_joker")] }),
+      setup: () => ({ jokers: [makeJoker(api, "basic_joker")] }),
       verify: () => {
         assert.equal(api.state.extraJokerSlots, 1);
         assert.equal(api.state.handLimitBonus, -1);
@@ -617,10 +625,10 @@ function runSelfTest(api) {
       setup: () => ({
         money: 47,
         jokers: [
-          api.JOKER_LIBRARY.find((item) => item.id === "basic_joker"),
-          api.JOKER_LIBRARY.find((item) => item.id === "pair_joker"),
-          api.JOKER_LIBRARY.find((item) => item.id === "double_joker"),
-          api.JOKER_LIBRARY.find((item) => item.id === "small_hand_joker"),
+          makeJoker(api, "basic_joker"),
+          makeJoker(api, "pair_joker"),
+          makeJoker(api, "double_joker"),
+          makeJoker(api, "small_hand_joker"),
         ],
       }),
       verify: () => {
@@ -631,7 +639,7 @@ function runSelfTest(api) {
     },
     {
       id: "ankh",
-      setup: () => ({ jokers: [api.JOKER_LIBRARY.find((item) => item.id === "basic_joker")] }),
+      setup: () => ({ jokers: [makeJoker(api, "basic_joker")] }),
       verify: () => {
         assert.equal(api.state.jokers.length, 2);
         assert.notEqual(api.state.jokers[0].ownedId, api.state.jokers[1].ownedId);
@@ -639,7 +647,7 @@ function runSelfTest(api) {
     },
     {
       id: "hex",
-      setup: () => ({ jokers: [api.JOKER_LIBRARY.find((item) => item.id === "basic_joker")] }),
+      setup: () => ({ jokers: [makeJoker(api, "basic_joker")] }),
       verify: () => {
         assert.equal(api.state.jokers.length, 1);
         assert.equal(api.state.jokers[0].edition, "polychrome");
@@ -709,11 +717,11 @@ function runSelfTest(api) {
     reset(api, {
       money: 99,
       jokers: [
-        api.JOKER_LIBRARY.find((item) => item.id === "basic_joker"),
-        api.JOKER_LIBRARY.find((item) => item.id === "pair_joker"),
-        api.JOKER_LIBRARY.find((item) => item.id === "double_joker"),
-        api.JOKER_LIBRARY.find((item) => item.id === "small_hand_joker"),
-        api.JOKER_LIBRARY.find((item) => item.id === "triple_joker"),
+        makeJoker(api, "basic_joker"),
+        makeJoker(api, "pair_joker"),
+        makeJoker(api, "double_joker"),
+        makeJoker(api, "small_hand_joker"),
+        makeJoker(api, "triple_joker"),
       ],
     });
     const owned = addConsumable(api, "spectral", "wraith");
@@ -726,11 +734,11 @@ function runSelfTest(api) {
   runCase("审判 满槽失败", () => {
     reset(api, {
       jokers: [
-        api.JOKER_LIBRARY.find((item) => item.id === "basic_joker"),
-        api.JOKER_LIBRARY.find((item) => item.id === "pair_joker"),
-        api.JOKER_LIBRARY.find((item) => item.id === "double_joker"),
-        api.JOKER_LIBRARY.find((item) => item.id === "small_hand_joker"),
-        api.JOKER_LIBRARY.find((item) => item.id === "triple_joker"),
+        makeJoker(api, "basic_joker"),
+        makeJoker(api, "pair_joker"),
+        makeJoker(api, "double_joker"),
+        makeJoker(api, "small_hand_joker"),
+        makeJoker(api, "triple_joker"),
       ],
     });
     const owned = addConsumable(api, "tarot", "judgement");
@@ -741,11 +749,11 @@ function runSelfTest(api) {
   runCase("灵魂 满槽失败", () => {
     reset(api, {
       jokers: [
-        api.JOKER_LIBRARY.find((item) => item.id === "basic_joker"),
-        api.JOKER_LIBRARY.find((item) => item.id === "pair_joker"),
-        api.JOKER_LIBRARY.find((item) => item.id === "double_joker"),
-        api.JOKER_LIBRARY.find((item) => item.id === "small_hand_joker"),
-        api.JOKER_LIBRARY.find((item) => item.id === "triple_joker"),
+        makeJoker(api, "basic_joker"),
+        makeJoker(api, "pair_joker"),
+        makeJoker(api, "double_joker"),
+        makeJoker(api, "small_hand_joker"),
+        makeJoker(api, "triple_joker"),
       ],
     });
     const owned = addConsumable(api, "spectral", "soul");
