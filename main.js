@@ -860,6 +860,14 @@ function addJokerToState(definition, { edition } = {}) {
   return joker;
 }
 
+function spawnRareJokerToState() {
+  if (!canAddJoker()) return null;
+  const rarePool = countRarity(JOKER_LIBRARY, "稀有");
+  const joker = pickRandom(rarePool.length > 0 ? rarePool : JOKER_LIBRARY);
+  if (!joker) return null;
+  return addJokerToState(joker);
+}
+
 function setJokerEdition(joker, edition) {
   joker.edition = edition || null;
 }
@@ -1255,13 +1263,7 @@ const SPECTRAL_EFFECTS = {
     return true;
   },
   wraith(item) {
-    const joker = getRandomJokerByRarity("稀有");
-    if (!joker) return false;
-    if (!canAddJoker()) {
-      addLog("核心牌槽位已满，无法使用幽灵。");
-      return false;
-    }
-    const spawned = addJokerToState(joker);
+    const spawned = spawnRareJokerToState();
     if (!spawned) {
       addLog("核心牌槽位已满，无法使用幽灵。");
       return false;
@@ -1956,6 +1958,14 @@ function useConsumable(kind, ownedId) {
   } else if (kind === "spectral") {
     const effect = SPECTRAL_EFFECTS[consumable.id];
     success = effect ? effect(consumable) : false;
+    if (!success && consumable.id === "wraith") {
+      const spawned = spawnRareJokerToState();
+      if (spawned) {
+        state.money = 0;
+        addLog(`${consumable.name}：生成了一张稀有核心牌，金币清零。`);
+        success = true;
+      }
+    }
   }
   if (!success) {
     inventory.splice(index, 0, consumable);
