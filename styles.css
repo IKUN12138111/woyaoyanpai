@@ -1457,6 +1457,7 @@ h2 {
 }
 
 #shopModal .modal-card {
+  width: min(1540px, calc(100vw - 40px));
   height: min(calc(100vh - 40px), 920px);
   display: flex;
   flex-direction: column;
@@ -1474,12 +1475,13 @@ h2 {
   overflow-y: auto;
   padding-right: 4px;
   align-content: start;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
 
 #shopModal .shop-area .joker-card {
-  min-height: 240px;
+  min-height: 260px;
 }
 
 .modal-head {
