@@ -124,6 +124,10 @@ function getJokerLimit() {
   return Math.max(1, MAX_JOKERS + (state.extraJokerSlots || 0));
 }
 
+function getJokerEffectiveRarity(joker) {
+  return joker.rarity || getJokerRarity(joker.id);
+}
+
 function createDefaultRankChipMultipliers() {
   return Object.fromEntries(RANKS.map((rank) => [rank.key, 1]));
 }
@@ -667,6 +671,50 @@ const els = {
 
 const state = {};
 
+function resetStateForTest(overrides = {}) {
+  for (const key of Object.keys(state)) {
+    delete state[key];
+  }
+  Object.assign(state, {
+    money: 0,
+    blindIndex: 0,
+    scoreCurrent: 0,
+    handsRemaining: BASE_HANDS,
+    discardsRemaining: BASE_DISCARDS,
+    drawPile: [],
+    discardPile: [],
+    handCards: [],
+    selectedIds: new Set(),
+    logs: [],
+    jokers: [],
+    planetInventory: [],
+    tarotInventory: [],
+    spectralInventory: [],
+    shopItems: [],
+    phase: "playing",
+    completedBlind: false,
+    playedHandTypesThisBlind: [],
+    handLevels: createDefaultHandLevels(),
+    handLimitBonus: 0,
+    extraJokerSlots: 0,
+    rankChipMultipliers: createDefaultRankChipMultipliers(),
+    victoryRewardClaimed: false,
+    victoryRewardRank: null,
+    lastConsumableUse: null,
+    outcome: null,
+    ...overrides,
+  });
+  if (!(state.selectedIds instanceof Set)) {
+    state.selectedIds = new Set(state.selectedIds || []);
+  }
+  if (!state.rankChipMultipliers) {
+    state.rankChipMultipliers = createDefaultRankChipMultipliers();
+  }
+  if (!state.handLevels) {
+    state.handLevels = createDefaultHandLevels();
+  }
+}
+
 function syncModalScrollLock() {
   const modalOpen = !els.shopModal.hidden || !els.resultModal.hidden || !els.helpModal.hidden;
   document.documentElement.classList.toggle("modal-open", modalOpen);
@@ -845,7 +893,7 @@ function getRandomJoker(filterFn = () => true) {
 }
 
 function getRandomJokerByRarity(rarity) {
-  return pickRandom(countRarity(JOKER_LIBRARY, rarity));
+  return pickRandom(JOKER_LIBRARY.filter((joker) => getJokerEffectiveRarity(joker) === rarity));
 }
 
 function canAddJoker() {
@@ -862,7 +910,7 @@ function addJokerToState(definition, { edition } = {}) {
 
 function spawnRareJokerToState() {
   if (!canAddJoker()) return null;
-  const rarePool = countRarity(JOKER_LIBRARY, "稀有");
+  const rarePool = JOKER_LIBRARY.filter((joker) => getJokerEffectiveRarity(joker) === "稀有");
   const joker = pickRandom(rarePool.length > 0 ? rarePool : JOKER_LIBRARY);
   if (!joker) return null;
   return addJokerToState(joker);
@@ -1296,7 +1344,7 @@ const SPECTRAL_EFFECTS = {
     return true;
   },
   soul(item) {
-    const pool = countRarity(JOKER_LIBRARY, "传奇");
+    const pool = JOKER_LIBRARY.filter((joker) => getJokerEffectiveRarity(joker) === "传奇");
     const joker = pickRandom(pool);
     if (!joker) return false;
     if (state.jokers.length >= getJokerLimit()) {
@@ -2285,4 +2333,71 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-initGame();
+globalThis.__WEB_BALATRO_API__ = {
+  state,
+  resetStateForTest,
+  HAND_TYPES,
+  RANKS,
+  SUITS,
+  PLANET_LIBRARY,
+  TAROT_LIBRARY,
+  SPECTRAL_LIBRARY,
+  JOKER_LIBRARY,
+  TAROT_EFFECTS,
+  SPECTRAL_EFFECTS,
+  createCard,
+  cloneCard,
+  createOwnedConsumable,
+  addConsumableToInventory,
+  sampleJokers,
+  samplePlanets,
+  sampleTarots,
+  sampleSpectrals,
+  addRandomPlanetToInventory,
+  addRandomTarotToInventory,
+  addRandomSpectralToInventory,
+  addRandomEnhancedCards,
+  createDefaultHandLevels,
+  createDefaultRankChipMultipliers,
+  getRankDefinition,
+  getSuitDefinition,
+  getRankStartingChips,
+  getHandLimit,
+  getJokerLimit,
+  getJokerRarity,
+  getPlanetRarity,
+  getTarotRarity,
+  getSpectralRarity,
+  countRarity,
+  getTargetsFromHand,
+  getSelectedCards,
+  removeRandomHandCards,
+  addCardsToHand,
+  applyPlanetEffect,
+  applyPlanetById,
+  setCardEnhancement,
+  setCardEdition,
+  setCardSeal,
+  setCardSuit,
+  setAllHandCardsSuit,
+  setAllHandCardsRank,
+  destroyHandCards,
+  copyHandCard,
+  upgradeCardRank,
+  getRandomJoker,
+  getRandomJokerByRarity,
+  canAddJoker,
+  addJokerToState,
+  spawnRareJokerToState,
+  useConsumable,
+  startRun,
+  render,
+  openShop,
+  leaveShop,
+  playSelected,
+  discardSelected,
+};
+
+if (!globalThis.__WEB_BALATRO_SKIP_INIT__) {
+  initGame();
+}
