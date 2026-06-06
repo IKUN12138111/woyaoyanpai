@@ -1568,6 +1568,77 @@ h2 {
   line-height: 1.7;
 }
 
+.victory-reward-panel {
+  margin: 16px 0 10px;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(242, 209, 128, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.victory-reward-head h4 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.victory-reward-head p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.rank-reward-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.rank-reward-btn {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  justify-items: start;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--ivory);
+  background: rgba(255, 255, 255, 0.08);
+  text-align: left;
+}
+
+.rank-reward-btn strong {
+  font-size: 20px;
+}
+
+.rank-reward-btn span {
+  color: var(--gold-soft);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.rank-reward-btn small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.rank-reward-btn.is-selected {
+  border-color: rgba(242, 209, 128, 0.9);
+  box-shadow: 0 0 0 2px rgba(242, 209, 128, 0.18);
+}
+
+.rank-reward-btn:disabled {
+  cursor: default;
+  opacity: 0.58;
+}
+
+.rank-reward-status {
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 @media (max-width: 1180px) {
   .table-layout {
     flex-direction: column;
@@ -1595,6 +1666,12 @@ h2 {
 
   .blind-banner {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .rank-reward-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

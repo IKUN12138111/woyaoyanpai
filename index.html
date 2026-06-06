@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>我不是赌神</title>
-  <link rel="stylesheet" href="./styles.css?v=11">
+  <link rel="stylesheet" href="./styles.css?v=12">
 </head>
 <body>
   <div class="table-noise"></div>
@@ -130,6 +130,14 @@
         <button id="closeResultBtn" class="btn btn-ghost">关闭</button>
       </div>
       <p id="resultText" class="modal-copy"></p>
+      <section id="victoryRewardPanel" class="victory-reward-panel" hidden>
+        <div class="victory-reward-head">
+          <h4>通关奖励</h4>
+          <p>选择一种点数，让它的初始筹码永久翻倍。</p>
+        </div>
+        <div id="rankRewardGrid" class="rank-reward-grid"></div>
+        <p id="rankRewardStatus" class="rank-reward-status"></p>
+      </section>
       <p id="resultStats" class="result-stats"></p>
       <div class="shop-actions">
         <button id="resultRestartBtn" class="btn btn-primary" onclick="document.getElementById('newRunBtn').click()">重新开局</button>
@@ -300,6 +308,6 @@
     </article>
   </template>
 
-  <script src="./main.js?v=7"></script>
+  <script src="./main.js?v=8"></script>
 </body>
 </html>

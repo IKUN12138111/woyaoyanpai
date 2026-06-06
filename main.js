@@ -124,6 +124,29 @@ function getJokerLimit() {
   return Math.max(1, MAX_JOKERS + (state.extraJokerSlots || 0));
 }
 
+function createDefaultRankChipMultipliers() {
+  return Object.fromEntries(RANKS.map((rank) => [rank.key, 1]));
+}
+
+function getRankChipMultiplier(rankKey) {
+  return state.rankChipMultipliers?.[rankKey] ?? 1;
+}
+
+function getRankStartingChips(rankKey) {
+  return getRankDefinition(rankKey).chips * getRankChipMultiplier(rankKey);
+}
+
+function refreshCardsForRank(rankKey) {
+  const chips = getRankStartingChips(rankKey);
+  for (const pile of [state.drawPile, state.discardPile, state.handCards]) {
+    for (const card of pile) {
+      if (card.rank === rankKey) {
+        card.chips = chips;
+      }
+    }
+  }
+}
+
 function createCard(rankKey, suitKey, overrides = {}) {
   const rank = getRankDefinition(rankKey);
   const suit = getSuitDefinition(suitKey);
@@ -134,7 +157,7 @@ function createCard(rankKey, suitKey, overrides = {}) {
     suitName: suit.name,
     rank: rank.key,
     rankValue: rank.value,
-    chips: rank.chips,
+    chips: getRankStartingChips(rank.key),
     face: rank.face,
     red: suit.red,
     enhancement: null,
@@ -190,7 +213,7 @@ function upgradeCardRank(card) {
   const nextRank = getRankDefinition(RANK_UPGRADE_ORDER[index - 1]);
   card.rank = nextRank.key;
   card.rankValue = nextRank.value;
-  card.chips = nextRank.chips;
+  card.chips = getRankStartingChips(nextRank.key);
   card.face = nextRank.face;
   return true;
 }
@@ -615,8 +638,12 @@ const els = {
   jokerSlotValue: document.getElementById("jokerSlotValue"),
   resultTitle: document.getElementById("resultTitle"),
   resultText: document.getElementById("resultText"),
+  victoryRewardPanel: document.getElementById("victoryRewardPanel"),
+  rankRewardGrid: document.getElementById("rankRewardGrid"),
+  rankRewardStatus: document.getElementById("rankRewardStatus"),
   resultStats: document.getElementById("resultStats"),
   resultModal: document.getElementById("resultModal"),
+  resultRestartBtn: document.getElementById("resultRestartBtn"),
   helpModal: document.getElementById("helpModal"),
   closeResultBtn: document.getElementById("closeResultBtn"),
   helpTopBtn: document.getElementById("helpTopBtn"),
@@ -644,6 +671,84 @@ function syncModalScrollLock() {
   const modalOpen = !els.shopModal.hidden || !els.resultModal.hidden || !els.helpModal.hidden;
   document.documentElement.classList.toggle("modal-open", modalOpen);
   document.body.classList.toggle("modal-open", modalOpen);
+}
+
+function getUnlockedRankKeys() {
+  return RANKS.filter((rank) => getRankChipMultiplier(rank.key) < 2).map((rank) => rank.key);
+}
+
+function applyPermanentRankUpgrade(rankKey) {
+  if (!state.rankChipMultipliers) {
+    state.rankChipMultipliers = createDefaultRankChipMultipliers();
+  }
+  if (getRankChipMultiplier(rankKey) >= 2) return false;
+  state.rankChipMultipliers[rankKey] = 2;
+  refreshCardsForRank(rankKey);
+  return true;
+}
+
+function claimVictoryRankReward(rankKey) {
+  if (state.outcome !== "win" || state.victoryRewardClaimed) return;
+  if (!applyPermanentRankUpgrade(rankKey)) return;
+  state.victoryRewardClaimed = true;
+  state.victoryRewardRank = rankKey;
+  addLog(`通关奖励：${rankKey} 的初始筹码永久翻倍。`);
+  render();
+}
+
+function renderVictoryRewardPanel() {
+  if (!els.victoryRewardPanel || !els.rankRewardGrid || !els.rankRewardStatus) return;
+  const isVictory = state.outcome === "win";
+  els.victoryRewardPanel.hidden = !isVictory;
+  els.rankRewardGrid.innerHTML = "";
+  if (!isVictory) {
+    if (els.resultRestartBtn) {
+      els.resultRestartBtn.disabled = false;
+    }
+    if (els.closeResultBtn) {
+      els.closeResultBtn.disabled = false;
+    }
+    return;
+  }
+
+  const availableRanks = getUnlockedRankKeys();
+  const claimed = Boolean(state.victoryRewardClaimed);
+  if (availableRanks.length === 0) {
+    els.rankRewardStatus.textContent = "所有点数都已经永久翻倍。";
+  } else if (claimed) {
+    els.rankRewardStatus.textContent = state.victoryRewardRank
+      ? `已选择 ${state.victoryRewardRank}，新的对局会永久生效。`
+      : "本次通关奖励已领取。";
+  } else {
+    els.rankRewardStatus.textContent = "请选择一种点数，完成本次通关奖励。";
+  }
+
+  for (const rank of RANKS) {
+    const multiplier = getRankChipMultiplier(rank.key);
+    const button = document.createElement("button");
+    button.className = "rank-reward-btn";
+    button.type = "button";
+    button.disabled = multiplier >= 2 || claimed;
+    if (state.victoryRewardRank === rank.key) {
+      button.classList.add("is-selected");
+    }
+    button.innerHTML = `
+      <strong>${rank.key}</strong>
+      <span>${multiplier >= 2 ? "已翻倍" : `x${multiplier} → x${multiplier * 2}`}</span>
+      <small>${getRankDefinition(rank.key).chips} 基础筹码</small>
+    `;
+    if (!button.disabled) {
+      button.addEventListener("click", () => claimVictoryRankReward(rank.key));
+    }
+    els.rankRewardGrid.appendChild(button);
+  }
+
+  if (els.resultRestartBtn) {
+    els.resultRestartBtn.disabled = availableRanks.length > 0 && !claimed;
+  }
+  if (els.closeResultBtn) {
+    els.closeResultBtn.disabled = availableRanks.length > 0 && !claimed;
+  }
 }
 
 function getJokerRarity(id) {
@@ -856,7 +961,7 @@ function setAllHandCardsRank(rankKey) {
     const rank = getRankDefinition(rankKey);
     card.rank = rank.key;
     card.rankValue = rank.value;
-    card.chips = rank.chips;
+    card.chips = getRankStartingChips(rank.key);
     card.face = rank.face;
   }
 }
@@ -1291,6 +1396,9 @@ function serializeState() {
     handLevels: state.handLevels,
     handLimitBonus: state.handLimitBonus,
     extraJokerSlots: state.extraJokerSlots,
+    rankChipMultipliers: state.rankChipMultipliers,
+    victoryRewardClaimed: state.victoryRewardClaimed,
+    victoryRewardRank: state.victoryRewardRank,
     lastConsumableUse: state.lastConsumableUse,
     outcome: state.outcome,
   };
@@ -1319,6 +1427,9 @@ function hydrateState(saved) {
   state.handLevels = saved.handLevels || createDefaultHandLevels();
   state.handLimitBonus = saved.handLimitBonus || 0;
   state.extraJokerSlots = saved.extraJokerSlots || 0;
+  state.rankChipMultipliers = { ...createDefaultRankChipMultipliers(), ...(saved.rankChipMultipliers || {}) };
+  state.victoryRewardClaimed = Boolean(saved.victoryRewardClaimed);
+  state.victoryRewardRank = saved.victoryRewardRank || null;
   state.lastConsumableUse = saved.lastConsumableUse || null;
   state.outcome = saved.outcome || null;
 }
@@ -1396,6 +1507,7 @@ function createShopEntry(entry) {
 }
 
 function startRun() {
+  state.rankChipMultipliers = state.rankChipMultipliers || createDefaultRankChipMultipliers();
   state.money = 4;
   state.blindIndex = 0;
   state.logs = [];
@@ -1408,6 +1520,8 @@ function startRun() {
   state.handLimitBonus = 0;
   state.extraJokerSlots = 0;
   state.lastConsumableUse = null;
+  state.victoryRewardClaimed = false;
+  state.victoryRewardRank = null;
   resetBlindState();
   addLog("新的一局已开始。");
   render();
@@ -1639,9 +1753,14 @@ function showOutcome(type) {
   state.outcome = type;
   state.phase = "outcome";
   if (type === "win") {
+    const unlockedRanks = getUnlockedRankKeys();
+    state.victoryRewardClaimed = unlockedRanks.length === 0;
+    state.victoryRewardRank = null;
     els.resultTitle.textContent = "\u901a\u5173\u6210\u529f";
     els.resultText.textContent = "\u4f60\u5df2\u7ecf\u6253\u7a7f\u7b2c 8 \u9636\u6bb5\u5934\u76ee\u76f2\u6ce8\uff0c\u8fd9\u4e00\u5c40\u6b63\u5f0f\u901a\u5173\u3002";
   } else {
+    state.victoryRewardClaimed = false;
+    state.victoryRewardRank = null;
     els.resultTitle.textContent = "\u672c\u5c40\u5931\u8d25";
     els.resultText.textContent = "\u5f53\u524d\u76f2\u6ce8\u6ca1\u6709\u8fbe\u6210\u76ee\u6807\u5206\uff0c\u8fd9\u4e00\u5c40\u5230\u6b64\u7ed3\u675f\u3002";
   }
@@ -1652,6 +1771,9 @@ function showOutcome(type) {
 }
 
 function dismissOutcome() {
+  if (state.outcome === "win" && getUnlockedRankKeys().length > 0 && !state.victoryRewardClaimed) {
+    return;
+  }
   els.resultModal.hidden = true;
   syncModalScrollLock();
 }
@@ -2094,20 +2216,27 @@ function render() {
       els.resultTitle.textContent = "\u672c\u5c40\u5931\u8d25";
       els.resultText.textContent = "\u5f53\u524d\u76f2\u6ce8\u6ca1\u6709\u8fbe\u6210\u76ee\u6807\u5206\uff0c\u8fd9\u4e00\u5c40\u5230\u6b64\u7ed3\u675f\u3002";
     }
-  els.resultStats.textContent = `\u505c\u5728\u7b2c ${blind.ante} \u9636\u6bb5\u7684 ${blind.type}\uff0c\u91d1\u5e01 ${state.money}\uff0c\u6838\u5fc3\u724c ${state.jokers.length} \u5f20\u3002`;
+    els.resultStats.textContent = `\u505c\u5728\u7b2c ${blind.ante} \u9636\u6bb5\u7684 ${blind.type}\uff0c\u91d1\u5e01 ${state.money}\uff0c\u6838\u5fc3\u724c ${state.jokers.length} \u5f20\u3002`;
   }
+  renderVictoryRewardPanel();
   syncModalScrollLock();
   serializeState();
 }
 
 els.newRunBtn.addEventListener("click", () => {
-  localStorage.removeItem(STORAGE_KEY);
   els.resultModal.hidden = true;
+  els.shopModal.hidden = true;
+  els.helpModal.hidden = true;
   startRun();
 });
 els.clearSaveBtn.addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
+  state.rankChipMultipliers = createDefaultRankChipMultipliers();
+  state.victoryRewardClaimed = false;
+  state.victoryRewardRank = null;
   els.resultModal.hidden = true;
+  els.shopModal.hidden = true;
+  els.helpModal.hidden = true;
   startRun();
   addLog("本地存档已清除，并已重开新局。");
   render();
