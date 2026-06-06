@@ -844,6 +844,14 @@ function getRandomJoker(filterFn = () => true) {
   return pickRandom(pool);
 }
 
+function getRandomJokerByRarity(rarity) {
+  return pickRandom(countRarity(JOKER_LIBRARY, rarity));
+}
+
+function canAddJoker() {
+  return state.jokers.length < getJokerLimit();
+}
+
 function addJokerToState(definition, { edition } = {}) {
   if (state.jokers.length >= getJokerLimit()) return null;
   const joker = cloneJoker(definition);
@@ -1247,15 +1255,18 @@ const SPECTRAL_EFFECTS = {
     return true;
   },
   wraith(item) {
-    const pool = countRarity(JOKER_LIBRARY, "稀有");
-    const joker = pickRandom(pool);
+    const joker = getRandomJokerByRarity("稀有");
     if (!joker) return false;
-    if (state.jokers.length >= getJokerLimit()) {
-      addLog("核心牌槽位已满，无法生成稀有核心牌。");
+    if (!canAddJoker()) {
+      addLog("核心牌槽位已满，无法使用幽灵。");
+      return false;
+    }
+    const spawned = addJokerToState(joker);
+    if (!spawned) {
+      addLog("核心牌槽位已满，无法使用幽灵。");
       return false;
     }
     state.money = 0;
-    addJokerToState(joker);
     addLog(`${item.name}：生成了一张稀有核心牌，金币清零。`);
     return true;
   },
