@@ -1450,6 +1450,29 @@ h2 {
   position: relative;
 }
 
+#shopModal .modal-card {
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#shopModal .modal-copy {
+  margin-bottom: 12px;
+}
+
+#shopModal .shop-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+  align-content: start;
+}
+
+#shopModal .shop-area .joker-card {
+  min-height: 300px;
+}
+
 .modal-head {
   display: flex;
   justify-content: space-between;
@@ -1486,6 +1509,7 @@ h2 {
 
 .shop-actions {
   margin-top: 16px;
+  flex: 0 0 auto;
 }
 
 .result-card {
