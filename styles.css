@@ -286,6 +286,19 @@ h2 {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
+.joker-strip .joker-area {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.joker-strip .joker-card {
+  flex: 0 0 260px;
+  width: 260px;
+  max-width: 260px;
+}
+
 .joker-card {
   position: relative;
   min-height: 360px;
