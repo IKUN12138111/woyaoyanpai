@@ -287,16 +287,12 @@ h2 {
 }
 
 .joker-strip .joker-area {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: flex-start;
+  align-items: start;
 }
 
 .joker-strip .joker-card {
-  flex: 0 0 260px;
-  width: 260px;
-  max-width: 260px;
+  width: 100%;
+  max-width: none;
 }
 
 .joker-card {
@@ -1579,6 +1575,12 @@ h2 {
 
   .side-panel {
     width: auto;
+  }
+}
+
+@media (min-width: 1181px) {
+  .joker-strip .joker-area {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
